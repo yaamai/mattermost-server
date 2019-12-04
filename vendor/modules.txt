@@ -10,6 +10,8 @@ github.com/avct/uasurfer
 github.com/beorn7/perks/quantile
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
+# github.com/coreos/go-oidc v2.1.0+incompatible
+github.com/coreos/go-oidc
 # github.com/corpix/uarand v0.1.1
 github.com/corpix/uarand
 # github.com/davecgh/go-spew v1.1.1
@@ -168,6 +170,9 @@ github.com/pelletier/go-toml
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35
+github.com/pquerna/cachecontrol
+github.com/pquerna/cachecontrol/cacheobject
 # github.com/prometheus/client_golang v1.1.0
 github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
@@ -249,6 +254,7 @@ golang.org/x/crypto/openpgp/elgamal
 golang.org/x/crypto/openpgp/errors
 golang.org/x/crypto/openpgp/packet
 golang.org/x/crypto/openpgp/s2k
+golang.org/x/crypto/pbkdf2
 # golang.org/x/image v0.0.0-20190910094157-69e4b8554b2a
 golang.org/x/image/bmp
 golang.org/x/image/ccitt
@@ -265,6 +271,7 @@ golang.org/x/image/webp
 # golang.org/x/net v0.0.0-20191119073136-fc4aabc6c914
 golang.org/x/net/bpf
 golang.org/x/net/context
+golang.org/x/net/context/ctxhttp
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
@@ -279,6 +286,9 @@ golang.org/x/net/ipv4
 golang.org/x/net/ipv6
 golang.org/x/net/publicsuffix
 golang.org/x/net/trace
+# golang.org/x/oauth2 v0.0.0-20190319182350-c85d3e98c914
+golang.org/x/oauth2
+golang.org/x/oauth2/internal
 # golang.org/x/sys v0.0.0-20191002091554-b397fe3ad8ed
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
@@ -314,6 +324,13 @@ golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/semver
 # google.golang.org/appengine v1.6.4
 google.golang.org/appengine/cloudsql
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/remote_api
+google.golang.org/appengine/internal/urlfetch
+google.golang.org/appengine/urlfetch
 # google.golang.org/genproto v0.0.0-20190927181202-20e1ac93f88c
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.24.0
@@ -364,6 +381,10 @@ gopkg.in/mail.v2
 gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/olivere/elastic.v6 v6.2.23
 gopkg.in/olivere/elastic.v6
+# gopkg.in/square/go-jose.v2 v2.4.0
+gopkg.in/square/go-jose.v2
+gopkg.in/square/go-jose.v2/cipher
+gopkg.in/square/go-jose.v2/json
 # gopkg.in/yaml.v2 v2.2.3
 gopkg.in/yaml.v2
 # willnorris.com/go/gifresize v1.0.0

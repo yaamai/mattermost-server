@@ -4,19 +4,28 @@
 package web
 
 import (
+	"bytes"
 	"net/http"
 	"net/url"
 	"path/filepath"
 	"strings"
 
+	"context"
+	"github.com/coreos/go-oidc"
 	"github.com/mattermost/mattermost-server/v5/app"
+	"github.com/mattermost/mattermost-server/v5/einterfaces"
 	"github.com/mattermost/mattermost-server/v5/mlog"
 	"github.com/mattermost/mattermost-server/v5/model"
+	oauthoidc "github.com/mattermost/mattermost-server/v5/model/oidc"
 	"github.com/mattermost/mattermost-server/v5/utils"
 	"github.com/mattermost/mattermost-server/v5/utils/fileutils"
+	"golang.org/x/oauth2"
 )
 
 func (w *Web) InitOAuth() {
+	w.MainRouter.Handle("/oidc/login", w.ApiHandler(testOidcLoginHandler)).Methods("GET")
+	w.MainRouter.Handle("/oidc/complete", w.ApiHandler(testOidcCompleteHandler)).Methods("GET")
+
 	// API version independent OAuth 2.0 as a service provider endpoints
 	w.MainRouter.Handle("/oauth/authorize", w.ApiHandlerTrustRequester(authorizeOAuthPage)).Methods("GET")
 	w.MainRouter.Handle("/oauth/authorize", w.ApiSessionRequired(authorizeOAuthApp)).Methods("POST")
@@ -34,6 +43,92 @@ func (w *Web) InitOAuth() {
 	w.MainRouter.Handle("/signup/{service:[A-Za-z0-9]+}/complete", w.ApiHandler(completeOAuth)).Methods("GET")
 	w.MainRouter.Handle("/login/{service:[A-Za-z0-9]+}/complete", w.ApiHandler(completeOAuth)).Methods("GET")
 	w.MainRouter.Handle("/api/v4/oauth_test", w.ApiSessionRequired(testHandler)).Methods("GET")
+}
+
+var oauth2Config oauth2.Config
+var verifier *oidc.IDTokenVerifier
+
+func testOidcCompleteHandler(c *Context, w http.ResponseWriter, r *http.Request) {
+	mlog.Info("OK")
+
+	// Verify state and errors.
+	ctx := context.TODO()
+	oauth2Token, err := oauth2Config.Exchange(ctx, r.URL.Query().Get("code"))
+	if err != nil {
+		// handle error
+		mlog.Error(err.Error())
+	}
+
+	// Extract the ID Token from OAuth2 token.
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok {
+		// handle missing token
+		mlog.Error("failed to extract id token")
+	}
+
+	// Parse and verify ID Token payload.
+	ctx = context.TODO()
+	idToken, err := verifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		mlog.Error(err.Error())
+	}
+
+	// Extract custom claims
+	var claims struct {
+		Email    string `json:"email"`
+		Verified bool   `json:"email_verified"`
+	}
+	if err := idToken.Claims(&claims); err != nil {
+		mlog.Error(err.Error())
+	}
+
+	mlog.Info("Claims:")
+	mlog.Info(claims.Email)
+
+	provider := &oauthoidc.OidcProvider{}
+	einterfaces.RegisterOauthProvider("oidc", provider)
+	user, err := c.App.CreateOAuthUser("oidc", bytes.NewReader([]byte{}), "")
+	// mlog.Error(err)
+	appErr := c.App.DoLogin(w, r, user, "")
+	if appErr != nil {
+		appErr.Translate(c.App.T)
+		c.Err = appErr
+		return
+	}
+
+	c.App.AttachSessionCookies(w, r)
+
+	redirectUrl := c.GetSiteURLHeader()
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	http.Redirect(w, r, redirectUrl, http.StatusTemporaryRedirect)
+
+	ReturnStatusOK(w)
+}
+
+func testOidcLoginHandler(c *Context, w http.ResponseWriter, r *http.Request) {
+
+	ctx := context.TODO()
+	provider, err := oidc.NewProvider(ctx, "http://192.168.132.1:13302/")
+	if err != nil {
+		mlog.Error(err.Error())
+		// handle error
+	}
+
+	verifier = provider.Verifier(&oidc.Config{ClientID: "mmdev"})
+
+	oauth2Config = oauth2.Config{
+		ClientID:     "mmdev",
+		ClientSecret: "mmdevmmdev",
+		RedirectURL:  "http://172.17.0.3:8065/oidc/complete",
+
+		// Discovery returns the OAuth2 endpoints.
+		Endpoint: provider.Endpoint(),
+
+		// "openid" is a required scope for OpenID Connect flows.
+		Scopes: []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+
+	http.Redirect(w, r, oauth2Config.AuthCodeURL("asdfasdfowiearwuo"), http.StatusFound)
 }
 
 func testHandler(c *Context, w http.ResponseWriter, r *http.Request) {
