@@ -201,7 +201,8 @@ func GenerateClientConfig(c *model.Config, diagnosticId string, license *model.L
 func GenerateLimitedClientConfig(c *model.Config, diagnosticId string, license *model.License) map[string]string {
 	props := make(map[string]string)
 
-	props["EnableSignInWithOidc"] = strconv.FormatBool(true)
+	// props["EnableSignInWithOidc"] = strconv.FormatBool(true)
+	props["EnableSignInWithOidc"] = strconv.FormatBool(*c.OidcSettings.Enable)
 
 	props["Version"] = model.CurrentVersion
 	props["BuildNumber"] = model.BuildNumber

@@ -210,6 +210,8 @@ const (
 	OFFICE365_SETTINGS_DEFAULT_AUTH_ENDPOINT     = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
 	OFFICE365_SETTINGS_DEFAULT_TOKEN_ENDPOINT    = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
 	OFFICE365_SETTINGS_DEFAULT_USER_API_ENDPOINT = "https://graph.microsoft.com/v1.0/me"
+
+	OIDC_SETTINGS_DEFAULT_SCOPE = "openid,profile,email"
 )
 
 var ServerTLSSupportedCiphers = map[string]uint16{
@@ -868,6 +870,36 @@ func (s *SSOSettings) setDefaults(scope, authEndpoint, tokenEndpoint, userApiEnd
 
 	if s.UserApiEndpoint == nil {
 		s.UserApiEndpoint = NewString(userApiEndpoint)
+	}
+}
+
+type OidcSettings struct {
+	Enable       *bool
+	ClientSecret *string
+	ClientId     *string
+	Scopes       *string
+	IssuerUrl    *string
+}
+
+func (o *OidcSettings) setDefaults(scope string) {
+	if o.Enable == nil {
+		o.Enable = NewBool(false)
+	}
+
+	if o.ClientSecret == nil {
+		o.ClientSecret = NewString("")
+	}
+
+	if o.ClientId == nil {
+		o.ClientId = NewString("")
+	}
+
+	if o.Scopes == nil {
+		o.Scopes = NewString(scope)
+	}
+
+	if o.IssuerUrl == nil {
+		o.IssuerUrl = NewString("")
 	}
 }
 
@@ -2465,6 +2497,7 @@ type Config struct {
 	AnnouncementSettings    AnnouncementSettings
 	ThemeSettings           ThemeSettings
 	GitLabSettings          SSOSettings
+	OidcSettings            OidcSettings
 	GoogleSettings          SSOSettings
 	Office365Settings       SSOSettings
 	LdapSettings            LdapSettings
@@ -2543,6 +2576,7 @@ func (o *Config) SetDefaults() {
 	o.PrivacySettings.setDefaults()
 	o.Office365Settings.setDefaults(OFFICE365_SETTINGS_DEFAULT_SCOPE, OFFICE365_SETTINGS_DEFAULT_AUTH_ENDPOINT, OFFICE365_SETTINGS_DEFAULT_TOKEN_ENDPOINT, OFFICE365_SETTINGS_DEFAULT_USER_API_ENDPOINT)
 	o.GitLabSettings.setDefaults("", "", "", "")
+	o.OidcSettings.setDefaults(OIDC_SETTINGS_DEFAULT_SCOPE)
 	o.GoogleSettings.setDefaults(GOOGLE_SETTINGS_DEFAULT_SCOPE, GOOGLE_SETTINGS_DEFAULT_AUTH_ENDPOINT, GOOGLE_SETTINGS_DEFAULT_TOKEN_ENDPOINT, GOOGLE_SETTINGS_DEFAULT_USER_API_ENDPOINT)
 	o.ServiceSettings.SetDefaults(isUpdate)
 	o.PasswordSettings.SetDefaults()

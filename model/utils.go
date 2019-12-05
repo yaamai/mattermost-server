@@ -22,6 +22,7 @@ import (
 	"unicode"
 
 	goi18n "github.com/mattermost/go-i18n/i18n"
+	"github.com/mattermost/mattermost-server/v5/mlog"
 	"github.com/pborman/uuid"
 )
 
@@ -120,6 +121,7 @@ func AppErrorFromJson(data io.Reader) *AppError {
 }
 
 func NewAppError(where string, id string, params map[string]interface{}, details string, status int) *AppError {
+	mlog.Debug("NewAppError" + where + id + details)
 	ap := &AppError{}
 	ap.Id = id
 	ap.params = params
